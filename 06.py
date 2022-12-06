@@ -1,17 +1,17 @@
 INPUT_FILE = "input_06"
 
 def find_marker(f, size):
-    buf = list(f.read(size))
-    pos = size 
-
-    if len(set(buf)) == size:
-        return pos
+    buf = ""
+    pos = 0 
 
     while (c := f.read(1)):
-        pos += 1
-        buf = buf[1:] + [c]
+        if c in buf:
+            buf = buf[buf.index(c)+1:]
 
-        if len(set(buf)) == size:
+        buf += c
+        pos += 1
+
+        if len(buf) == size:
             break
 
     return pos
@@ -19,8 +19,8 @@ def find_marker(f, size):
 if __name__ == "__main__":
     with open(INPUT_FILE) as f:
         pos = find_marker(f, 4)
-        print(pos)
+        print(pos) # 1198
 
     with open(INPUT_FILE) as f:
         pos = find_marker(f, 14)
-        print(pos)
+        print(pos) # 3120
