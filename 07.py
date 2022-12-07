@@ -43,6 +43,8 @@ class Tree():
         self.children = []
         self.parent = parent
 
+        self._size = None
+
         if children is not None:
             for c in children:
                 self.add_child(c)
@@ -65,6 +67,7 @@ class Tree():
             raise ValueError(f"{c} is not a Tree")
 
         self.children.append(c)
+        self._size = None
 
     def find_child(self, name):
         if name == "..":
@@ -78,6 +81,9 @@ class Tree():
         return None
 
     def size(self):
+        if self._size is not None:
+            return self._size
+
         size = 0
 
         for c in self.children:
@@ -86,6 +92,7 @@ class Tree():
             else:
                 size += c.data
 
+        self._size = size
         return size
 
     def find_children_recursive(self, predicate):
