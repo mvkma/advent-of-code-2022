@@ -19,7 +19,8 @@ class Monkey:
             item = self.items[0]
             self.items.remove(item)
 
-            item = int(self.operation(item) / 3)
+            # item = int(self.operation(item) / 3)
+            item = self.operation(item) % 9699690
             if self.test(item):
                 out[self.targets[0]].append(item)
             else:
@@ -64,7 +65,9 @@ def play_round(monkeys):
 if __name__ == "__main__":
     inspected_items = defaultdict(int)
 
-    for _ in range(20):
+    for i in range(10_000):
+        if (i % 100) == 0:
+            print(i)
         rd = play_round(PUZZLE)
         for k, v in rd.items():
             inspected_items[k] += v
