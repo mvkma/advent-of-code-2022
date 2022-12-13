@@ -74,7 +74,6 @@ def compare(A, B):
 
     return r
 
-
 @cmp_to_key
 def compare_wrapper(A, B):
     if compare(A, B):
