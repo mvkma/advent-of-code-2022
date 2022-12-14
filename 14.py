@@ -31,6 +31,8 @@ def sand(grid, source):
 def count_sand(grid):
     return sum([c == "o" for c in "".join(["".join(row) for row in grid])])
 
+GRID_GROWTH = 10
+
 def sand_part2(grid, source):
     xx, yy = source
     done = False
@@ -41,12 +43,12 @@ def sand_part2(grid, source):
     while True:
         if xx < 0 or xx >= ncols - 1:
             for k in range(nrows - 1):
-                grid[k] = ["."] + grid[k] + ["."]
+                grid[k] = ["."] * GRID_GROWTH + grid[k] + ["."] * GRID_GROWTH
 
-            grid[nrows - 1] = ["#"] + grid[nrows - 1] + ["#"]
+            grid[nrows - 1] = ["#"] * GRID_GROWTH + grid[nrows - 1] + ["#"] * GRID_GROWTH
 
-            xx = xx + 1
-            source = (source[0] + 1, source[1])
+            xx = xx + GRID_GROWTH
+            source = (source[0] + GRID_GROWTH, source[1])
 
         if grid[yy + 1][xx] == ".":
             xx, yy = xx, yy + 1
@@ -63,6 +65,32 @@ def sand_part2(grid, source):
             break
 
     return done, source
+
+def part1(orig_grid, sand_pos):
+    grid = [row.copy() for row in orig_grid]
+
+    k = 0
+    while not sand(grid, (sand_pos, 0)):
+        k += 1
+
+    return k
+
+def part2(orig_grid, sand_pos):
+    grid = [row.copy() for row in orig_grid]
+    ncols = len(grid[0])
+
+    grid.append(["."] * ncols)
+    grid.append(["#"] * ncols)
+
+    done = False
+    source = (sand_pos, 0)
+    k = 0
+
+    while not done:
+        done, source = sand_part2(grid, source)
+        k += 1
+
+    return k
 
 if __name__ == "__main__":
     walls = []
@@ -111,22 +139,7 @@ if __name__ == "__main__":
 
     orig_grid = [row.copy() for row in grid]
 
-    k = 0
-    while not sand(grid, (sand_pos, 0)):
-        k += 1
+    print(part1(orig_grid, sand_pos))
 
-    print(k)
+    print(part2(orig_grid, sand_pos))
 
-    grid = [row.copy() for row in orig_grid]
-    grid.append(["."] * ncols)
-    grid.append(["#"] * ncols)
-
-    done = False
-    source = (sand_pos, 0)
-    k = 0
-
-    while not done:
-        done, source = sand_part2(grid, source)
-        k += 1
-
-    print(k)
