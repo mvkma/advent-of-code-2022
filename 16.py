@@ -38,11 +38,29 @@ def step_distance(start, end, graph):
         tunnels = new_tunnels
         depth += 1
 
-def find_best(pos, opened, flow_val, rem, graph, distances):
+def find_best_rec(pos, opened, flow_val, rem, graph, distances):
+    if rem <= 0:
+        return flow_val
+
+    if pos in opened:
+        best = 0
+        for v in distances[pos].keys():
+            if v in opened or rem < distances[pos][v]:
+                continue
+
+            val = find_best_rec(v, opened, flow_val, rem - distances[pos][v], graph, distances)
+            if val > best:
+                best = val
+
+        return best
+
+    return find_best_rec(pos, opened.union([pos]), flow_val + graph[pos][0] * rem,
+                         rem - 1, graph, distances)
+
+def find_best(pos: str, opened: set, flow_val: int, rem: int, graph: dict, distances: dict):
     best = 0
     q = []
-    # (pos, opened, flow_val, rem)
-    q.append((pos, set(opened), flow_val, rem))
+    q.append((pos, opened, flow_val, rem))
 
     while q:
         pos, opened, flow_val, rem = q.pop()
@@ -61,7 +79,7 @@ def find_best(pos, opened, flow_val, rem, graph, distances):
         else:
             # valve is already open
             for v in distances[pos].keys():
-                if v in opened:
+                if v in opened or rem < distances[pos][v]:
                     continue
                 q.append((v, opened, flow_val, rem - distances[pos][v]))
 
@@ -87,7 +105,7 @@ if __name__ == "__main__":
             distances[k1][k2] = step_distance(k1, k2, graph)
 
     # Part 1
-    print(find_best("AA", ["AA"], 0, 29, graph, distances))
+    print(find_best("AA", set(["AA"]), 0, 29, graph, distances))
 
     # Part 2
     best = 0
@@ -121,7 +139,7 @@ if __name__ == "__main__":
         else:
             # valve is already open
             for v in distances[pos].keys():
-                if v in opened:
+                if v in opened or rem < distances[pos][v]:
                     continue
                 q.append((v, opened, flow_val, rem - distances[pos][v]))
 
