@@ -57,10 +57,14 @@ def find_best_rec(pos, opened, flow_val, rem, graph, distances):
     return find_best_rec(pos, opened.union([pos]), flow_val + graph[pos][0] * rem,
                          rem - 1, graph, distances)
 
-def find_best(pos: str, opened: set, flow_val: int, rem: int, graph: dict, distances: dict):
+def find_best(pos: str, opened: set, flow_val: int, rem: int,
+              graph: dict, distances: dict, keep_data: bool = False):
     best = 0
     q = []
     q.append((pos, opened, flow_val, rem))
+
+    if keep_data:
+        best_configs = dict()
 
     while q:
         pos, opened, flow_val, rem = q.pop()
@@ -76,6 +80,11 @@ def find_best(pos: str, opened: set, flow_val: int, rem: int, graph: dict, dista
             opened = opened.union([pos])
             flow_val = flow_val + graph[pos][0] * rem
             q.append((pos, opened, flow_val, rem - 1))
+
+            if keep_data:
+                opened = tuple(sorted(opened))
+                if best_configs.get(opened, 0) < flow_val:
+                    best_configs[opened] = flow_val
         else:
             # valve is already open
             for v in distances[pos].keys():
@@ -83,7 +92,10 @@ def find_best(pos: str, opened: set, flow_val: int, rem: int, graph: dict, dista
                     continue
                 q.append((v, opened, flow_val, rem - distances[pos][v]))
 
-    return best
+    if keep_data:
+        return best, best_configs
+    else:
+        return best
 
 if __name__ == "__main__":
     graph = dict()
@@ -108,39 +120,21 @@ if __name__ == "__main__":
     print(find_best("AA", set(["AA"]), 0, 29, graph, distances))
 
     # Part 2
+    _, best_configs = find_best("AA", set(["AA"]), 0, 25, graph, distances, keep_data=True)
+
     best = 0
-    q = []
-    # (pos1, pos2, opened, flow_val, rem)
-    q.append(("AA", set(["AA"]), 0, 25))
-
-    k = 0
-    while q:
-        if k % 1000 == 0:
-            print(k, len(q), best)
-        k += 1
-
-        pos, opened, flow_val, rem = q.pop()
-
-        if flow_val > best:
-            best = flow_val
-
-        if rem <= 0:
-            continue
-
-        if pos not in opened:
-            # open valve in current room
-            opened = opened.union([pos])
-            flow_val = flow_val + graph[pos][0] * rem
-            q.append((pos, opened, flow_val, rem - 1))
-
-            sub_best = find_best("AA", opened, flow_val, 25, graph, distances)
-            if sub_best > best:
-                best = sub_best
-        else:
-            # valve is already open
-            for v in distances[pos].keys():
-                if v in opened or rem < distances[pos][v]:
+    best_open = None
+    for opened1 in best_configs.keys():
+        for opened2 in best_configs.keys():
+            # for v in opened1[1:]:
+            #     if v in opened2[1:]:
+            if len(set(opened1[1:]).intersection(opened2[1:])) > 0:
                     continue
-                q.append((v, opened, flow_val, rem - distances[pos][v]))
+            else:
+                val = best_configs[opened1] + best_configs[opened2]
+                if val > best:
+                    best = val
+                    best_open = (opened1, opened2)
 
     print(best)
+
