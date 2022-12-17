@@ -1,4 +1,4 @@
-from collections import namedtuple, defaultdict
+from collections import namedtuple, defaultdict, deque
 from itertools import cycle
 
 INPUT_FILE = "input_17"
@@ -58,21 +58,23 @@ def overlap(b1, b2):
 
 class Tetris():
     def __init__(self, blocks, jets):
-        self.blocks = cycle(blocks)
+        self.blocks = cycle(enumerate(blocks))
         self.jets = cycle(enumerate(jets))
         self.loc = 0
+
         # [(xx, yy, block), ...]
-        self.tower = [(0, -1, BOTTOM)]
+        # self.tower = [(0, -1, BOTTOM)]
+        self.tower = deque(maxlen=100)
+        self.tower.append((0, -1, BOTTOM))
+        self.tower_len = 1
         self.height = 0
 
-        self.falling_block = (2, self.height + 4, next(self.blocks))
+        self.block_ix, block = next(self.blocks)
+        self.falling_block = (2, self.height + 4, block)
 
-        self.seen = defaultdict(list)
+        self.seen = defaultdict(lambda: deque(maxlen=3))
 
     def can_move(self, dx, dy):
-        if self.falling_block is None:
-            return False
-
         xx, yy, block = self.falling_block
 
         if yy > self.height:
@@ -85,9 +87,7 @@ class Tetris():
         # Now we have to also check the other blocks
         for other_block in reversed(self.tower):
             # Are the other block and the current block going to overlap?
-            uu, vv, other = other_block
-
-            if overlap((xx + dx, yy + dy, block), (uu, vv, other)):
+            if overlap((xx + dx, yy + dy, block), other_block):
                 return False
         else:
             if 0 <= xx + dx and xx + block.width + dx <= WIDTH:
@@ -98,24 +98,22 @@ class Tetris():
     def new_falling_block(self):
         # Put the current falling block on the tower
         self.tower.append(self.falling_block)
-        # self.height += self.falling_block[-1].height
+        self.tower_len += 1
         self.height = max(self.height, self.falling_block[1] + self.falling_block[-1].height)
 
-        self.falling_block = (2, self.height + 3, next(self.blocks))
+        self.block_ix, block = next(self.blocks)
+        self.falling_block = (2, self.height + 3, block)
 
-        self.seen[(self.loc, self.falling_block[-1])].append((self.height, len(self.tower)))
+        self.seen[(self.loc, self.block_ix)].append((self.height, self.tower_len))
 
     def step(self):
 
         xx, yy, block = self.falling_block
 
-        # print(f"Instruction v  ->  ", end="")
         if self.can_move(0, -1):
-            # print("okay")
             moved = True
             xx, yy = xx, yy - 1
         else:
-            # print("blocked (new falling block)")
             self.new_falling_block()
             xx, yy, block = self.falling_block
 
@@ -129,14 +127,8 @@ class Tetris():
         else:
             raise ValueError(f"Unknown instruction: {p}")
 
-        # print(f"Instruction {p}  ->  ", end="")
-
         if self.can_move(dx, dy):
-            # print("okay")
             xx, yy = xx + dx, yy + dy
-        else:
-            # print("blocked")
-            pass
 
         self.falling_block = (xx, yy, block)
 
@@ -152,16 +144,7 @@ class Tetris():
             for u, v in block.positions:
                 grid[yy + v][xx + u] = "@"
 
-        i = 0
-        while i < len(grid):
-            grid[i].append(f" <- {i}")
-            i += 40
-
         print("\n".join("".join(l) for l in reversed(grid)))
-
-        for i, line in enumerate(grid):
-            if line[:7] == ["#", "#", "#", ".", "#", "#", "#"]:
-                print(i)
 
 
 if __name__ == "__main__":
@@ -171,29 +154,33 @@ if __name__ == "__main__":
     # T = Tetris(BLOCKS, SAMPLE)
     T = Tetris(BLOCKS, instructions)
 
-    while len(T.tower) < 5000:
+    l = 0
+    target = 2022
+    # target = 1000000000000
+    while l < 20000:
         T.step()
 
-    p1s = []
-    p2s = []
-    for k, v in T.seen.items():
-        if len(v) <= 1:
-            continue
+        p1s = set()
+        p2s = set()
+        res = set()
+        for k, v in T.seen.items():
+            if len(v) <= 1:
+                continue
 
-        p1 = v[1][1] - v[0][1]
-        p2 = v[1][0] - v[0][0]
+            for i in range(1, len(v)):
 
-        p1s.append(p1)
-        p2s.append(p2)
+                p1 = v[i][1] - v[i - 1][1]
+                p2 = v[i][0] - v[i - 1][0]
 
-    # p1 = 35
-    # p2 = 53
-    # target = 2023
-    print(p1, p2)
-    target = 1000000000000
+                p1s.add(p1)
+                p2s.add(p2)
 
-    for q, a in [min(v) for k, v in T.seen.items() if len(v) > 1]:
-        if ((target - a) * p2) % p1 == 0:
-            res = (target - a) / p1 * p2 + q
+                q = v[i - 1][0]
+                a = v[i - 1][1]
+                if (target + 1 - a) * p2 % p1 == 0:
+                    res.add((target + 1 - a) / p1 * p2 + q)
 
-    print(res)
+        if T.tower_len > l:
+            l = T.tower_len
+            print(T.tower_len, T.height, p1s, p2s, res)
+
