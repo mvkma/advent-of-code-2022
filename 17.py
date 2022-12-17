@@ -64,7 +64,7 @@ class Tetris():
 
         # [(xx, yy, block), ...]
         # self.tower = [(0, -1, BOTTOM)]
-        self.tower = deque(maxlen=100)
+        self.tower = deque(maxlen=200)
         self.tower.append((0, -1, BOTTOM))
         self.tower_len = 1
         self.height = 0
@@ -132,7 +132,7 @@ class Tetris():
 
         self.falling_block = (xx, yy, block)
 
-    def show(self):
+    def show(self, return_grid=False):
         grid = [["."] * WIDTH for _ in range(self.height + 10)]
 
         for xx, yy, block in self.tower:
@@ -144,15 +144,36 @@ class Tetris():
             for u, v in block.positions:
                 grid[yy + v][xx + u] = "@"
 
-        print("\n".join("".join(l) for l in reversed(grid)))
+        if return_grid:
+            return grid
+        else:
+            print("\n".join("".join(l) for l in reversed(grid)))
 
+def find_period(data, max_window=None):
+    if max_window is None:
+        max_window = len(data) // 2
+
+    print(f"max_window = {max_window}")
+
+    w = 2
+
+    while w <= max_window:
+        i = 0
+        while i + w < len(data):
+            if data[i] != data[i + w]:
+                break
+            i += 1
+        else:
+            print(f"found w = {w}")
+
+        w += 1
 
 if __name__ == "__main__":
     with open(INPUT_FILE) as f:
         instructions = f.readlines()[0].strip()
 
-    # T = Tetris(BLOCKS, SAMPLE)
-    T = Tetris(BLOCKS, instructions)
+    T = Tetris(BLOCKS, SAMPLE)
+    # T = Tetris(BLOCKS, instructions)
 
     l = 0
     target = 2022
