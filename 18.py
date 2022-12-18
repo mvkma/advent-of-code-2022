@@ -39,8 +39,21 @@ def get_sides_directed(x, y, z):
     ]
     return sides
 
-def adjacent_cubes(x, y, z):
-    return {(x + 1, y, z), (x - 1, y, z), (x, y + 1, z), (x, y - 1, z), (x, y, z + 1), (x, y, z - 1)}
+def adjacent_cubes(x, y, z, codim=1):
+    if codim == 1:
+        return {(x + 1, y, z), (x - 1, y, z), (x, y + 1, z),
+                (x, y - 1, z), (x, y, z + 1), (x, y, z - 1)}
+    elif codim == 2:
+        return {(x + 1, y + 1, x), (x + 1, y - 1, z), (x - 1, y + 1, z), (x - 1, y - 1, z),
+                (x, y + 1, z + 1), (x, y + 1, z - 1), (x, y - 1, z + 1), (x, y - 1, z - 1),
+                (x + 1, y, z + 1), (z + 1, y, z - 1), (x - 1, z, z + 1), (x - 1, y, z - 1)}
+    elif codim == 3:
+        return {(x + 1, y + 1, z + 1), (x + 1, y + 1, z - 1),
+                (x + 1, y - 1, z + 1), (x + 1, y - 1, z - 1),
+                (x - 1, y + 1, z + 1), (x - 1, y + 1, z - 1),
+                (x - 1, y - 1, z + 1), (x - 1, y - 1, z - 1)}
+    else:
+        raise ValueError(f"Invalid codimension: {codim}")
 
 if __name__ == "__main__":
     cubes = []
@@ -86,16 +99,16 @@ if __name__ == "__main__":
     # If yes, the face where they touch is covered.
     count = 0
     for c in cubes:
-        count += sum(adj not in cubes for adj in adjacent_cubes(*c))
+        count += 6 - sum(adj in cubes for adj in adjacent_cubes(*c))
 
     print(count)
 
     scubes = set(cubes)
     filled = set()
-    queue = []
+    queue = set()
 
     xmin, ymin, zmin = min(scubes)
-    queue.append((xmin - 1, ymin, zmin))
+    queue.add((xmin - 1, ymin, zmin))
 
     while len(queue) > 0:
         xyz = queue.pop()
@@ -103,8 +116,7 @@ if __name__ == "__main__":
         filled.add(xyz)
 
         for new_xyz in adjacent_cubes(*xyz).difference(filled).difference(scubes):
-            new_adj = adjacent_cubes(*new_xyz)
-
+            new_adj = adjacent_cubes(*new_xyz, codim=1)
 
             # We have to add new_xyz if any of its adjacent cubes is part of our original cube
             c1 = [adj in scubes for adj in new_adj]
@@ -113,7 +125,7 @@ if __name__ == "__main__":
             c2 = [any(nxyz in scubes for nxyz in adjacent_cubes(*adj)) for adj in new_adj]
 
             if any(c1) or any(c2):
-                queue.append(new_xyz)
+                queue.add(new_xyz)
 
     print(sum(sum(adj in scubes for adj in adjacent_cubes(*f)) for f in filled))
 
