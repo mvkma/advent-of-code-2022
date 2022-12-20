@@ -67,14 +67,7 @@ class DoublyLinkedList():
         if steps == 0:
             return
 
-        if steps >= self.length:
-            steps = steps % (self.length - 1)
-
-        if steps < 0:
-            steps = abs(steps)
-            if steps >= self.length:
-                steps = steps % (self.length - 1)
-            steps = self.length - 1 - steps
+        steps = steps % (self.length - 1)
 
         self.remove(node)
 
@@ -165,3 +158,27 @@ if __name__ == "__main__":
 
     print(res)
 
+    ll = DoublyLinkedList(circular=True)
+    nodes = []
+    for n in nums2:
+        node = DoublyLinkedNode(n)
+        nodes.append(node)
+        ll.append(node)
+
+    for i in range(10):
+        for n in nodes:
+            ll.move(n, n.data)
+
+    cur = ll.find_first(0)
+    pos = 0
+    res = 0
+    while pos <= 3000:
+        cur = cur.next
+        pos += 1
+        if cur is ll.lst:
+            cur = ll.fst.next
+
+        if pos in (1000, 2000, 3000):
+            res += cur.data
+
+    print(res)
