@@ -1,3 +1,4 @@
+import time
 from operator import add, sub, mul, floordiv
 
 INPUT_FILE = "input_21"
@@ -76,7 +77,9 @@ if __name__ == "__main__":
             else:
                 waiting[k] = (rest[0], rest[2], OPERATIONS[rest[1]])
 
+    t0 = time.time()
     print(compute_root(waiting, done))
+    t1 = time.time()
 
     # Reduce the graph
     while not "root" in done:
@@ -114,3 +117,8 @@ if __name__ == "__main__":
             target = INV_OPERATIONS[(op, 0)](target, done[r2])
 
     print(target)
+    t2 = time.time()
+
+    print("Timings:")
+    print(f"  Part 1: {(t1 - t0) * 1000} ms")
+    print(f"  Part 2: {(t2 - t1) * 1000} ms")
