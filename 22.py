@@ -252,25 +252,19 @@ if __name__ == "__main__":
 
     grid = [list(row) for row in grid]
 
-    steps_wrong = []
     for steps, d in instructions:
         while steps > 0:
             grid[yy][xx] = facing[(dx, dy)]
 
-            nxx = (xx + dx)
-            nyy = (yy + dy)
+            nxx, nyy = xx + dx, yy + dy
+            ndx, ndy = dx, dy
 
-            print(get_face_num(xx, yy), (xx, yy), (nxx, nyy), (dx, dy), steps)
+            # print(get_face_num(xx, yy), (xx, yy), (nxx, nyy), (dx, dy), steps)
 
             if nxx >= len(grid[yy]) or nxx < 0 or nyy >= len(grid) or nyy < 0 or grid[nyy][nxx] == " ":
                 loc, dd = jump(nxx, nyy, ncols, nrows)
                 nxx, nyy = loc
-
-                if grid[nyy][nxx] == "#":
-                    steps = 0
-                    continue
-
-                dx, dy = dd
+                ndx, ndy = dd
 
             if grid[nyy][nxx] == "#":
                 steps = 0
@@ -278,14 +272,13 @@ if __name__ == "__main__":
 
             steps -= 1
             xx, yy = nxx, nyy
+            dx, dy = ndx, ndy
 
         if d is None:
             break
 
         dx, dy = NEXT_DIRECTIONS[(dx, dy, d)]
-        print(f"New directions: ({dx}, {dy}) [{d}]    pos: ({xx}, {yy})")
-        steps_wrong.append(((dx, dy), d, (xx, yy)))
+        # print(f"New directions: ({dx}, {dy}) [{d}]    pos: ({xx}, {yy})")
 
-    print((xx, yy), (dx, dy))
     print(1000 * (yy + 1) + 4 * (xx + 1))
 
