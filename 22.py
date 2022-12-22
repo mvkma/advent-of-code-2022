@@ -241,21 +241,11 @@ if __name__ == "__main__":
         else:
             return get_face_num(*jmp[0])
 
-    facing = {
-        (1, 0): ">",
-        (-1, 0): "<",
-        (0, 1): "V",
-        (0, -1): "^",
-    }
     xx, yy = (grid[0].find("."), 0)
     dx, dy = (1, 0)
 
-    grid = [list(row) for row in grid]
-
     for steps, d in instructions:
         while steps > 0:
-            grid[yy][xx] = facing[(dx, dy)]
-
             nxx, nyy = xx + dx, yy + dy
             ndx, ndy = dx, dy
 
