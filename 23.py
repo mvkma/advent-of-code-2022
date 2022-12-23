@@ -36,6 +36,8 @@ def check_move_dir(pos, elves, d):
         case "W":
             to_check = {(xx - 1, yy), (xx - 1, yy - 1), (xx - 1, yy + 1)}
             new_pos = (xx - 1, yy)
+        case _:
+            raise ValueError(f"Unknown direction: {d}")
 
     if any(p in elves for p in to_check):
         return False, None
