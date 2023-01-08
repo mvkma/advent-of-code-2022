@@ -17,10 +17,12 @@ def find_marker(f, size):
     return pos
 
 if __name__ == "__main__":
+    # Part 1
     with open(INPUT_FILE) as f:
         pos = find_marker(f, 4)
-        print(pos) # 1198
+        print(pos)
 
+    # Part 2
     with open(INPUT_FILE) as f:
         pos = find_marker(f, 14)
-        print(pos) # 3120
+        print(pos)

@@ -88,6 +88,9 @@ if __name__ == "__main__":
                 rope10 = move(rope10, d)
                 tail_positions_rope10.add(rope10[-1])
 
+        # Part 1
         print(len(tail_positions_rope2))
+
+        # Part 2
         print(len(tail_positions_rope10))
 

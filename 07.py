@@ -143,10 +143,11 @@ if __name__ == "__main__":
 
         # Part 1
         results = root.find_children_recursive(lambda k: isinstance(k, Tree) and k.size() <= 100_000)
-        print(sum(k.size() for k in results)) # 1743217
+        print(sum(k.size() for k in results))
 
+        # Part 2
         delta = NEEDED_CAPACITY - (TOTAL_CAPACITY - root.size())
         candidates = root.find_children_recursive(lambda k: isinstance(k, Tree) and k.size() >= delta)
         candidates.sort(key=lambda k: k.size())
-        print(candidates[0].size()) # 8319096
+        print(candidates[0].size())
 
