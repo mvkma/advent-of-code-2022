@@ -66,5 +66,8 @@ with open(INPUT_FILE) as f:
         other_s = choose_other(STRATEGIES[s1], s2)
         score_part2 += score_round(STRATEGIES[s1], other_s)
 
-    print(score_part1) # 13526
-    print(score_part2) # 14204
+    # Part 1
+    print(score_part1)
+
+    # Part 2
+    print(score_part2)

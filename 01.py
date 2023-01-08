@@ -12,5 +12,9 @@ with open(INPUT_FILE) as f:
             cal += int(l.strip())
 
     calories = sorted(calories)
+
+    # Part 1
     print(calories[-1])
+
+    # Part 2
     print(sum(calories[-3:]))

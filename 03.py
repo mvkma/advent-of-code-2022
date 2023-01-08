@@ -47,5 +47,8 @@ if __name__ == "__main__":
                 group_priorities += process_group(group)
                 group = []
 
-        print(priorities) # 8185
-        print(group_priorities) # 2817
+        # Part 1
+        print(priorities)
+
+        # Part 2
+        print(group_priorities)

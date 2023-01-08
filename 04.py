@@ -31,5 +31,8 @@ if __name__ == "__main__":
             if overlaps(r1, r2):
                 count_overlaps += 1
 
-        print(count_contains) # 503
-        print(count_overlaps) # 827
+        # Part 1
+        print(count_contains)
+
+        # Part 2
+        print(count_overlaps)

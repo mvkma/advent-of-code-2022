@@ -51,5 +51,8 @@ if __name__ == "__main__":
             top_p1 += state_p1[i][-1]
             top_p2 += state_p2[i][-1]
 
+        # Part 1
         print(top_p1)
+
+        # Part 2
         print(top_p2)
