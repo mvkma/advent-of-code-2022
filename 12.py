@@ -1,4 +1,4 @@
-from collections import namedtuple, defaultdict
+from heapq import heappush, heappop
 
 INPUT_FILE = "input_12"
 
@@ -31,50 +31,37 @@ def parse_heightmap(f):
         
     return heightmap, start, end
 
-def find_shortest_path(heightmap, start, end, verbose_freq=100):
-    # We keep a dictionary that maps point (x, y) -> path
-    # where path is the shortest path we have found to (x, y) up until now.
-    paths = dict()
-    paths[start] = [start]
+def find_shortest_path(heightmap, start, ends):
+    q = []
+    heappush(q, (0, start))
 
-    nrows = len(heightmap)
-    ncols = len(heightmap[0])
+    seen = dict()
+    seen[start] = 0
 
-    k = 0
+    while len(q) > 0:
+        steps, pos = heappop(q)
+        yy, xx = pos
 
-    while True:
-        points = tuple(paths.keys())
+        if (yy, xx) in ends:
+            continue
 
-        if end in points:
-            break
+        for d1, d2 in GRID_DIRECTIONS:
+            nyy = yy + d1
+            nxx = xx + d2
 
-        if (k % verbose_freq) == 0:
-            print(k, len(points))
+            if nyy < 0 or nrows <= nyy or nxx < 0 or ncols <= nxx:
+                continue
 
-        for x0, x1 in points:
-            for d1, d2 in GRID_DIRECTIONS:
-                new_x0 = x0 + d1
-                new_x1 = x1 + d2
+            if (heightmap[yy][xx] - heightmap[nyy][nxx]) > 1:
+                continue
 
-                # We're at the edge of the grid
-                if (not (0 <= new_x0 < nrows)) or (not (0 <= new_x1 < ncols)):
-                    continue
+            if (nyy, nxx) in seen and seen[(nyy, nxx)] <= steps + 1:
+                continue
 
-                # We are allowed to go one step down and arbitrary many steps up in this way
-                # (reversed compared to the description in the problem)
-                if (heightmap[x0][x1] - heightmap[new_x0][new_x1]) <= 1:
-                    cur_path = paths[(x0, x1)]
-                    new_pt = (new_x0, new_x1)
+            seen[(nyy, nxx)] = steps + 1
+            heappush(q, (steps + 1, (nyy, nxx)))
 
-                    if new_pt in cur_path:
-                        continue
-
-                    if (not new_pt in paths) or (len(paths[new_pt]) > len(cur_path) + 1):
-                        paths[new_pt] = cur_path + [new_pt]
-
-        k += 1
-
-    return paths
+    return {point: dist for point, dist in seen.items() if point in ends}
 
 if __name__ == "__main__":
     with open(INPUT_FILE) as f:
@@ -84,8 +71,7 @@ if __name__ == "__main__":
     ncols = len(heightmap[0])
 
     # We have to reverse end and start, because we want to go backwards
-    paths_part1 = find_shortest_path(heightmap, end, start)
-    print(len(paths_part1[start]) - 1) # 440
+    print(find_shortest_path(heightmap, end, [start])[start])
 
     apoints = []
     for i in range(nrows):
@@ -93,6 +79,4 @@ if __name__ == "__main__":
             if heightmap[i][j] == 0:
                 apoints.append((i, j))
 
-    # Maybe we are lucky that the shortest one to an arbitrary a was already found in round 1
-    print(min([len(paths_part1[p]) for p in filter(lambda p: p in paths_part1, apoints)]) - 1)
-
+    print(min(find_shortest_path(heightmap, end, apoints).values()))
