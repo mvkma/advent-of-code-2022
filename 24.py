@@ -1,4 +1,5 @@
 from collections import deque, defaultdict
+from heapq import heappush, heappop
 
 INPUT_FILE = "input_24"
 
@@ -81,40 +82,29 @@ def print_grid(blizzards, nrows, ncols, cur=None):
     print("#" * (ncols - 1) + "." + "#")
 
 def part1(blizzards, nrows, ncols):
-    q = deque()
-    q.append(((1, 0), 0))
-    hist = {0: blizzards}
-    best_states = set()
-    best = 1000000
+    target = (ncols - 1, nrows)
 
-    k = 0
+    q = []
+    heappush(q, (0, (1, 0)))
+
+    blizzard_hist = {0: blizzards}
+    seen = set()
+
     while q:
-        cur, l = q.popleft()
+        l, cur = heappop(q)
 
-        if (cur, l) in best_states:
-            continue
-
-        best_states.add((cur, l))
-
-        if k % 100_000 == 0:
-            print(k, len(q), len(best_states), len(hist), l, best, cur)
-            # print_grid(blizzards, nrows, ncols, cur)
-
-        if l + 1 not in hist:
-            new_blizzards = update_blizzards(hist[l], nrows, ncols)
-            hist[l+1] = new_blizzards
+        if l + 1 not in blizzard_hist:
+            new_blizzards = update_blizzards(blizzard_hist[l], nrows, ncols)
+            blizzard_hist[l+1] = new_blizzards
         else:
-            new_blizzards = hist[l+1]
+            new_blizzards = blizzard_hist[l+1]
 
         if cur not in new_blizzards:
-            q.append((cur, l + 1))
+            heappush(q, (l + 1, cur))
 
         for nxx, nyy in get_neighbors(*cur, nrows, ncols):
-            # if (nxx, nyy) == (ncols - 1, nrows):
-            if nxx == ncols - 1 and nyy == nrows:
-                # print(f"target reached with {l}")
-                best = min(best, l)
-                continue
+            if (nxx, nyy) == target:
+                return l + 1
 
             if nxx <= 0 or nxx >= ncols or nyy <= 0 or nyy >= nrows:
                 continue
@@ -122,58 +112,50 @@ def part1(blizzards, nrows, ncols):
             if (nxx, nyy) in new_blizzards:
                 continue
 
-            q.append(((nxx, nyy), l + 1))
+            if (l + 1, (nxx, nyy)) in seen:
+                continue
 
-        k += 1
+            seen.add((l + 1, (nxx, nyy)))
+            heappush(q, (l + 1, (nxx, nyy)))
 
 def part2(blizzards, nrows, ncols):
-    q = deque()
-    q.append(((1, 0), 0))
-    hist = {0: blizzards}
-    best_states = set()
-    best = 1000000
+    start = (1, 0)
+    end = (ncols - 1, nrows)
+
+    q = []
+    heappush(q, (0, (1, 0)))
+
+    blizzard_hist = {0: blizzards}
+    seen = set()
 
     rounds = 0
 
-    k = 0
     while q:
-        cur, l = q.popleft()
+        l, cur = heappop(q)
 
-        if (cur, l) in best_states:
-            continue
-
-        best_states.add((cur, l))
-
-        if k % 100_000 == 0:
-            print(k, len(q), len(best_states), len(hist), l, rounds, best, cur)
-            # print_grid(blizzards, nrows, ncols, cur)
-
-        if l + 1 not in hist:
-            new_blizzards = update_blizzards(hist[l], nrows, ncols)
-            hist[l+1] = new_blizzards
+        if l + 1 not in blizzard_hist:
+            new_blizzards = update_blizzards(blizzard_hist[l], nrows, ncols)
+            blizzard_hist[l+1] = new_blizzards
         else:
-            new_blizzards = hist[l+1]
+            new_blizzards = blizzard_hist[l+1]
 
         if cur not in new_blizzards:
-            q.append((cur, l + 1))
+            heappush(q, (l + 1, cur))
 
         for nxx, nyy in get_neighbors(*cur, nrows, ncols):
-            # if (nxx, nyy) == (ncols - 1, nrows):
-            if nxx == ncols - 1 and nyy == nrows:
+            if (nxx, nyy) == end:
                 if rounds == 0:
                     rounds += 1
-                    q.clear()
-                    q.append(((nxx, nyy), l + 1))
+                    q = []
+                    heappush(q, (l + 1, (nxx, nyy)))
                     break
                 if rounds == 2:
-                    best = min(best, l)
-                    q.clear()
-                    print(l + 1)
+                    return l + 1
 
-            if nxx == 1 and nyy == 0 and rounds == 1:
+            if (nxx, nyy) == start and rounds == 1:
                 rounds += 1
-                q.clear()
-                q.append(((nxx, nyy), l + 1))
+                q = []
+                heappush(q, (l + 1, (nxx, nyy)))
 
             if nxx <= 0 or nxx >= ncols or nyy <= 0 or nyy >= nrows:
                 continue
@@ -181,10 +163,11 @@ def part2(blizzards, nrows, ncols):
             if (nxx, nyy) in new_blizzards:
                 continue
 
-            q.append(((nxx, nyy), l + 1))
+            if (l + 1, (nxx, nyy)) in seen:
+                continue
 
-        k += 1
-
+            seen.add((l + 1, (nxx, nyy)))
+            heappush(q, (l + 1, (nxx, nyy)))
 
 if __name__ == "__main__":
     blizzards = defaultdict(list)
@@ -201,6 +184,11 @@ if __name__ == "__main__":
             for i, c in enumerate(line):
                 ncols = max(i, ncols)
                 if c in (">", "<", "^", "v"):
-                    # blizzards.add(((i, j), c))
                     blizzards[(i, j)].append(c)
+
+    # Part 1
+    print(part1(blizzards, nrows, ncols))
+
+    # Part 2
+    print(part2(blizzards, nrows, ncols))
 

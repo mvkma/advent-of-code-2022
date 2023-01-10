@@ -113,10 +113,13 @@ if __name__ == "__main__":
 
     k = 0
     while not static:
+        # Part 1
         if k == 10:
             print(empty_tiles(new_elves))
+
         new_elves, move_dirs, static = move(new_elves, move_dirs)
         k += 1
 
+    # Part 2
     print(k)
 
