@@ -14,6 +14,8 @@ SAMPLE = """1=-0-2
 1=
 122"""
 
+SNAFU_SYMBS = ["=", "-", "0", "1", "2"]
+
 def snafu_to_dec(s):
     n = 0
     for i, c in enumerate(reversed(s)):
@@ -42,8 +44,8 @@ def dec_to_snafu(n):
     n = n % (5**(k - 1))
 
     for m in range(k - 2, -1, -1):
-        s += ["=", "-", "0", "1", "2"][n // (5**m)]
-        n = (n) % (5**m)
+        s += SNAFU_SYMBS[n // (5**m)]
+        n = n % (5**m)
 
     return s
 
