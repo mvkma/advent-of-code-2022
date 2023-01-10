@@ -126,8 +126,6 @@ if __name__ == "__main__":
     best_open = None
     for opened1 in best_configs.keys():
         for opened2 in best_configs.keys():
-            # for v in opened1[1:]:
-            #     if v in opened2[1:]:
             if len(set(opened1[1:]).intersection(opened2[1:])) > 0:
                     continue
             else:

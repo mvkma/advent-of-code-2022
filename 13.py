@@ -29,14 +29,9 @@ SAMPLE = """[1,1,3,1,1]
 
 
 def compare(A, B):
-    # ab = zip(A, B)
     k = 0
     r = None
     while r is None:
-        # try:
-        #     a, b = next(ab)
-        # except StopIteration:
-        #     return None
         if k == len(A) and k == len(B):
             break
         elif k < len(A) and k >= len(B):

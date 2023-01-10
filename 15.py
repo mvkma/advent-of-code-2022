@@ -51,6 +51,7 @@ if __name__ == "__main__":
             sensors.add(sensor)
             beacons.add(beacon)
 
+    # Part 1
     intervals = []
     y0 = 2_000_000
     # y0 = 10
@@ -72,6 +73,7 @@ if __name__ == "__main__":
 
     print(sum(l) - sum(map(lambda p: p[1] == y0, beacons)))
 
+    # Part 2
     cutoff = 4_000_000
     # cutoff = 20
     target = None
@@ -100,4 +102,4 @@ if __name__ == "__main__":
         if target is not None:
             break
 
-    print(target[0] * 4000000 + target[1])
+    print(target[0] * 4_000_000 + target[1])

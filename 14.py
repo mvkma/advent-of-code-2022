@@ -3,6 +3,8 @@ INPUT_FILE = "input_14"
 SAMPLE = """498,4 -> 498,6 -> 496,6
 503,4 -> 502,4 -> 502,9 -> 494,9"""
 
+GRID_GROWTH = 10
+
 def print_grid(grid):
     for row in grid:
         print("".join(row))
@@ -30,8 +32,6 @@ def sand(grid, source):
 
 def count_sand(grid):
     return sum([c == "o" for c in "".join(["".join(row) for row in grid])])
-
-GRID_GROWTH = 10
 
 def sand_part2(grid, source):
     xx, yy = source
