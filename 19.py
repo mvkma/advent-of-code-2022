@@ -54,21 +54,23 @@ def blueprint_best(costs, production, n, keep_states=500):
 
     return max(s[1][0] for s in q)
 
-production = [
-    Vec(0, 0, 0, 1),  # ore-bot
-    Vec(0, 0, 1, 0),  # clay-bot
-    Vec(0, 1, 0, 0),  # obsidian-bot
-    Vec(1, 0, 0, 0)   # geode-bot
-]
+def dfs(initial_state, costs):
+    def new_states(state):
+        new = set()
+        prod_rate, stones, rem = state
+        for c, p in zip(costs, PRODUCTION):
+            if all(a >= b for a, b in zip(stones, c)):
+                # Produce a new robot (increases prod_rate and costs c)
+                new.add((prod_rate + p, stones - c + prod_rate, rem - 1))
 
-sample1 = [
-    Vec(0, 0, 0, 4),
-    Vec(0, 0, 0, 2),
-    Vec(0, 0, 14, 3),
-    Vec(0, 7, 0, 2),
-]
+        # The case where we just save up (no production of new robots)
+        new.add((prod_rate, stones + prod_rate, rem - 1))
 
-def dfs(initial_state, new_states):
+        return new
+
+    def purge_states(states):
+        return sorted(states, key=lambda s: s[0] + s[1])[-500:]
+
     S = []
     S.append(initial_state)
     seen = dict()
@@ -90,7 +92,23 @@ def dfs(initial_state, new_states):
             for s in new_states(state):
                 S.append(s)
 
+            S = purge_states(S)
+
     return best
+
+PRODUCTION = [
+    Vec(0, 0, 0, 1),  # ore-bot
+    Vec(0, 0, 1, 0),  # clay-bot
+    Vec(0, 1, 0, 0),  # obsidian-bot
+    Vec(1, 0, 0, 0)   # geode-bot
+]
+
+SAMPLE1 = [
+    Vec(0, 0, 0, 4),
+    Vec(0, 0, 0, 2),
+    Vec(0, 0, 14, 3),
+    Vec(0, 7, 0, 2),
+]
 
 if __name__ == "__main__":
     blueprints = dict()
@@ -107,38 +125,21 @@ if __name__ == "__main__":
 
             blueprints[nums[0]] = costs
 
-    
-    # (prod_rate, stones)
-    initial_state = (Vec(0, 0, 0, 1), Vec(0, 0, 0, 0), 23)
+    # DFS is slow
+    # (prod_rate, stones, remaining_minutes)
+    initial_state = (Vec(0, 0, 0, 1), Vec(0, 0, 0, 0), 24)
+    # print(dfs(initial_state, SAMPLE1))
 
-    costs = sample1
-    max_costs = Vec(*[max(costs[b][s] for b in range(4)) for s in range(4)])
-
-    print(blueprint_best(costs, production, 23, keep_states=5000))
-    
-    def next_states(state):
-        new = set()
-        prod_rate, stones, rem = state
-        for c, p in zip(costs, production):
-            if all(a >= b for a, b in zip(stones, c)):
-                # Produce a new robot (increases prod_rate and costs c)
-                new.add((prod_rate + p, stones - c + prod_rate, rem - 1))
-
-            # The case where we just save up (no production of new robots)
-        new.add((prod_rate, stones + prod_rate, rem - 1))
-
-        return new
-
-    print(dfs(initial_state, next_states))
-
+    # Part 1
     res = 0
-    # for i, costs in blueprints.items():
-    #     res += blueprint_best(costs, production, 24) * i
+    for i, costs in blueprints.items():
+        res += blueprint_best(costs, PRODUCTION, 24) * i
 
     print(res)
 
+    # Part 2
     res = 1
-    # for i in range(3):
-    #     res *= blueprint_best(blueprints[i+1], production, 32, keep_states=5000)
+    for i in range(3):
+        res *= blueprint_best(blueprints[i+1], PRODUCTION, 32, keep_states=5000)
 
     print(res)

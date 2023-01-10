@@ -151,6 +151,100 @@ def jump_example(xx, yy, ncols, nrows):
     if xx == 0 and 8 <= yy <= 11:
         return (11, - yy + 8), (-1, 0)
 
+def get_face_num(xx, yy):
+    if 50 <= xx <= 99 and 0 <= yy <= 49:
+        return 1
+    if 100 <= xx <= 149 and 0 <= yy <= 49:
+        return 2
+    if 50 <= xx <= 99 and 50 <= yy <= 99:
+        return 3
+    if 0 <= xx <= 49 and 100 <= yy <= 149:
+        return 4
+    if 50 <= xx <= 99 and 100 <= yy <= 149:
+        return 5
+    if 0 <= xx <= 49 and 150 <= yy <= 199:
+        return 6
+
+    jmp = None # jump(xx, yy, ncols, nrows)
+    if jmp is None:
+        return " "
+    else:
+        return get_face_num(*jmp[0])
+
+def part1(grid, instructions):
+    nrows = len(grid)
+    ncols = max(len(row) for row in grid)
+    for i, row in enumerate(grid):
+        grid[i] = row.ljust(ncols)
+
+    xx, yy = (grid[0].find("."), 0)
+    dx, dy = (1, 0)
+
+    for steps, d in instructions:
+        while steps > 0:
+            nxx = (xx + dx) % len(grid[yy])
+            nyy = (yy + dy) % len(grid)
+
+            while grid[nyy][nxx] == " ":
+                nxx = (nxx + dx) % len(grid[yy])
+                nyy = (nyy + dy) % len(grid)
+
+            if grid[nyy][nxx] == "#":
+                steps = 0
+                continue
+
+            steps -= 1
+            xx, yy = nxx, nyy
+
+        if d is None:
+            break
+
+        dx, dy = NEXT_DIRECTIONS[(dx, dy, d)]
+
+    res = 1000 * (yy + 1) + 4 * (xx + 1)
+
+    match dx, dy:
+        case ( 1,  0): res += 0
+        case ( 0,  1): res += 1
+        case (-1,  0): res += 2
+        case ( 0, -1): res += 3
+
+    return res
+
+def part2(grid, instructions):
+    nrows = len(grid)
+    ncols = max(len(row) for row in grid)
+    for i, row in enumerate(grid):
+        grid[i] = row.ljust(ncols)
+
+    xx, yy = (grid[0].find("."), 0)
+    dx, dy = (1, 0)
+
+    for steps, d in instructions:
+        while steps > 0:
+            nxx, nyy = xx + dx, yy + dy
+            ndx, ndy = dx, dy
+
+            if nxx >= len(grid[yy]) or nxx < 0 or nyy >= len(grid) or nyy < 0 or grid[nyy][nxx] == " ":
+                loc, dd = jump(nxx, nyy, ncols, nrows)
+                nxx, nyy = loc
+                ndx, ndy = dd
+
+            if grid[nyy][nxx] == "#":
+                steps = 0
+                continue
+
+            steps -= 1
+            xx, yy = nxx, nyy
+            dx, dy = ndx, ndy
+
+        if d is None:
+            break
+
+        dx, dy = NEXT_DIRECTIONS[(dx, dy, d)]
+
+    return 1000 * (yy + 1) + 4 * (xx + 1)
+
 if __name__ == "__main__":
     map_done = False
     grid = list()
@@ -177,98 +271,10 @@ if __name__ == "__main__":
     dirs = re.findall("[R,L]", instructions)
     instructions = list(zip_longest(nums, dirs))
 
-    nrows = len(grid)
-    ncols = max(len(row) for row in grid)
-    for i, row in enumerate(grid):
-        grid[i] = row.ljust(ncols)
+    # Part 1
+    print(part1(grid, instructions))
 
+    # Part 2
+    print(part2(grid, instructions))
 
-    xx, yy = (grid[0].find("."), 0)
-    dx, dy = (1, 0)
-
-    for steps, d in instructions:
-        while steps > 0:
-            nxx = (xx + dx) % len(grid[yy])
-            nyy = (yy + dy) % len(grid)
-
-            while grid[nyy][nxx] == " ":
-                nxx = (nxx + dx) % len(grid[yy])
-                nyy = (nyy + dy) % len(grid)
-
-            if grid[nyy][nxx] == "#":
-                steps = 0
-                continue
-
-            steps -= 1
-            xx, yy = nxx, nyy
-
-        if d is None:
-            break
-
-        dx, dy = NEXT_DIRECTIONS[(dx, dy, d)]
-        # print(f"New directions: ({dx}, {dy}) [{d}]    pos: ({xx}, {yy})")
-
-    res = 1000 * (yy + 1) + 4 * (xx + 1)
-
-    if (dx, dy) == (1, 0):
-        res += 0
-    elif (dx, dy) == (0, 1):
-        res += 1
-    elif (dx, dy) == (-1, 0):
-        res += 2
-    elif (dx, dy) == (0, -1):
-        res += 3
-
-    print(res)
-
-    def get_face_num(xx, yy):
-        if 50 <= xx <= 99 and 0 <= yy <= 49:
-            return 1
-        if 100 <= xx <= 149 and 0 <= yy <= 49:
-            return 2
-        if 50 <= xx <= 99 and 50 <= yy <= 99:
-            return 3
-        if 0 <= xx <= 49 and 100 <= yy <= 149:
-            return 4
-        if 50 <= xx <= 99 and 100 <= yy <= 149:
-            return 5
-        if 0 <= xx <= 49 and 150 <= yy <= 199:
-            return 6
-
-        jmp = None # jump(xx, yy, ncols, nrows)
-        if jmp is None:
-            return " "
-        else:
-            return get_face_num(*jmp[0])
-
-    xx, yy = (grid[0].find("."), 0)
-    dx, dy = (1, 0)
-
-    for steps, d in instructions:
-        while steps > 0:
-            nxx, nyy = xx + dx, yy + dy
-            ndx, ndy = dx, dy
-
-            # print(get_face_num(xx, yy), (xx, yy), (nxx, nyy), (dx, dy), steps)
-
-            if nxx >= len(grid[yy]) or nxx < 0 or nyy >= len(grid) or nyy < 0 or grid[nyy][nxx] == " ":
-                loc, dd = jump(nxx, nyy, ncols, nrows)
-                nxx, nyy = loc
-                ndx, ndy = dd
-
-            if grid[nyy][nxx] == "#":
-                steps = 0
-                continue
-
-            steps -= 1
-            xx, yy = nxx, nyy
-            dx, dy = ndx, ndy
-
-        if d is None:
-            break
-
-        dx, dy = NEXT_DIRECTIONS[(dx, dy, d)]
-        # print(f"New directions: ({dx}, {dy}) [{d}]    pos: ({xx}, {yy})")
-
-    print(1000 * (yy + 1) + 4 * (xx + 1))
 

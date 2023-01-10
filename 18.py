@@ -63,6 +63,7 @@ if __name__ == "__main__":
             x, y, z = map(int, line.strip().split(","))
             cubes.append((x, y, z))
 
+    # Part 1
     free_sides = set()
     seen_sides = set()
 
@@ -77,9 +78,9 @@ if __name__ == "__main__":
 
             seen_sides.add(s)
 
+    # print(len(free_sides))
 
-    print(len(free_sides))
-
+    # Again part 1
     all_sides = set()
     double_sides = set()
     for c in cubes:
@@ -93,8 +94,9 @@ if __name__ == "__main__":
 
             all_sides.add((xyz, normal))
 
-    print(len(all_sides) - 2 * len(double_sides))
+    # print(len(all_sides) - 2 * len(double_sides))
 
+    # Again and again part 1
     # Check for each cube if adjacent cubes are present.
     # If yes, the face where they touch is covered.
     count = 0
@@ -103,6 +105,7 @@ if __name__ == "__main__":
 
     print(count)
 
+    # Part 2
     scubes = set(cubes)
     filled = set()
     queue = set()

@@ -107,7 +107,6 @@ def mix(nums, rounds=1):
 
     return mixed
 
-
 if __name__ == "__main__":
     nums = []
     ll = DoublyLinkedList(circular=True)
@@ -122,6 +121,7 @@ if __name__ == "__main__":
             nodes.append(node)
             ll.append(node)
 
+    # Part 1, naive solution
     mixed = mix(nums)
     tmp = [n for _, n in mixed]
     res = 0
@@ -130,7 +130,7 @@ if __name__ == "__main__":
 
     print(res)
 
-    # Now do the linked list
+    # Part 1, doubly linked list
     for n in nodes:
         ll.move(n, n.data)
 
@@ -146,8 +146,9 @@ if __name__ == "__main__":
         if pos in (1000, 2000, 3000):
             res += cur.data
 
-    print(res)
+    # print(res)
 
+    # Part 2, naive solution
     nums2 = [n * DECRYPTION_KEY for n in nums]
     mixed2 = mix(nums2, 10)
 
@@ -158,6 +159,7 @@ if __name__ == "__main__":
 
     print(res)
 
+    # Part 2, double linked list
     ll = DoublyLinkedList(circular=True)
     nodes = []
     for n in nums2:
@@ -181,4 +183,4 @@ if __name__ == "__main__":
         if pos in (1000, 2000, 3000):
             res += cur.data
 
-    print(res)
+    # print(res)
